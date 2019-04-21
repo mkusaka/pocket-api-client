@@ -123,12 +123,10 @@ class ApiClient {
 
   constructor(consumerKey: string, options?: optionConfig) {
     this._consumerKey = consumerKey;
-    this._redirectUri = "http://localhost:8080/get";
-    if (options) {
-      this._requestToken = options.requestToken;
-      this._accessToken = options.accessToken;
-      this._redirectUri = options.redirectUri;
-    }
+    const { requestToken, accessToken, redirectUri } = options;
+    this._requestToken = requestToken;
+    this._accessToken = accessToken;
+    this._redirectUri = redirectUri || "http://localhost:8080/get";
   }
 
   getRequestToken() {
