@@ -1,6 +1,6 @@
 {
   "name": "@mkusaka/pocket-api-client",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "pocket api client",
   "main": "dist/index.js",
   "engines": {
