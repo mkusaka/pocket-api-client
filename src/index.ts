@@ -1,6 +1,7 @@
 const pocket = require("pocket-api");
 
 import { request } from "./ajax";
+import { rejects } from "assert";
 interface requestTokenResponse {
   code: string;
   state: any;
@@ -91,6 +92,22 @@ interface optionConfig {
   redirectUri?: string,
 }
 
+interface retrievingParameters {
+  consumer_key: string;
+  access_token: string;
+  state?: "unread" | "archive" | "all";
+  favorite?: 0 | 1;
+  tag?: string;
+  contentType?: "article" | "video" | "image";
+  sort?: "newest" | "oldest" | "title" | "site";
+  detailType?: "simple" | "complete";
+  search?: string;
+  domain?: string;
+  since?: number; // timestamp
+  count?: number;
+  offset?: number;
+}
+
 class ApiClient {
   requestTokenPath: string = "oauth/request";
   accessTokenPath: string = "oauth/authorize";
@@ -139,23 +156,63 @@ class ApiClient {
     if (!this._requestToken) {
       throw TypeError("this operation require request_token.");
     }
-    return new Promise(resolve => {
-      pocket.getAccessToken(
-        this._consumerKey,
-        this._requestToken,
-        (data: requestTokenResponse) => {
-          const accessToken = data.code;
-          this._accessToken = accessToken;
-          return resolve(accessToken);
-        }
-      );
-    });
+
+    return request({
+      method: "POST",
+      data: {
+        consumer_key: this._consumerKey,
+        code: this._requestToken,
+        // TODO: this parameter may remobale thing.
+        // see: https://getpocket.com/developer/docs/authentication
+        redirect_uri: this._redirectUri,
+      },
+      url: this.accessTokenPath,
+    }).then(response => {
+        console.log(response);
+        console.log(response.data.code);
+        this._accessToken = response.data.code;
+        return this._accessToken;
+      });
   }
 
   getArticles() {
     if (!this._accessToken) {
       throw TypeError("this operation require access_token.");
     }
+    const data: retrievingParameters = {
+      consumer_key: this._consumerKey,
+      access_token: this._accessToken,
+    }
+    return request({
+      method: "POST",
+      data,
+      url: this.accessTokenPath,
+    }).then(response => {
+      const data: getArticlesResponse = response.data;
+      if (!data) {
+        return Promise.reject();
+      }
+      this._resArticles = data.list;
+      return this._resArticles;
+    });
+    new Promise((resolve, reject) => {
+      pocket.getArticles(
+        this._consumerKey,
+        this._accessToken,
+        (error, data?: getArticlesResponse) => {
+          if (error || !data) {
+            return reject(error);
+          }
+
+          const articleList = data.list;
+          this._resArticles = Object.keys(articleList).map(
+            key => articleList[key]
+          );
+          return resolve(this._resArticles);
+        }
+      );
+    });
+
     return new Promise((resolve, reject) => {
       pocket.getArticles(
         this._consumerKey,
