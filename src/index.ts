@@ -1,9 +1,4 @@
-const pocket = require("pocket-api");
-
-interface requestTokenResponse {
-  code: string;
-  state: any;
-}
+import { request } from "./ajax";
 
 interface responseArticle {
   item_id: string;
@@ -16,7 +11,7 @@ interface responseArticle {
   time_updated: string;
   time_read: string;
   time_favorited: string;
-  sort_id: 10,
+  sort_id: number,
   resolved_title: string;
   resolved_url: string;
   excerpt: string;
@@ -32,7 +27,7 @@ interface responseArticle {
     logo: string;
     greyscale_logo: string;
   },
-  listen_duration_estimate: 835
+  listen_duration_estimate: number
 }
 
 /*
@@ -71,7 +66,7 @@ interface responseArticle {
 }
 */
 
-interface getArticlesResponse {
+interface retrieveArticlesResponse {
   state: number;
   complete: number;
   list: {
@@ -84,77 +79,134 @@ interface getArticlesResponse {
   since: number
 }
 
+interface cilentConfigOptions {
+  accessToken?: string,
+  requestToken?: string,
+  redirectUri?: string,
+}
+
+interface retrievingRequiredParameters {
+  consumer_key: string;
+  access_token: string;
+}
+
+interface retrievingOptionalParameters {
+  state?: "unread" | "archive" | "all";
+  favorite?: 0 | 1;
+  tag?: string;
+  contentType?: "article" | "video" | "image";
+  sort?: "newest" | "oldest" | "title" | "site";
+  detailType?: "simple" | "complete";
+  search?: string;
+  domain?: string;
+  since?: number; // timestamp
+  count?: number;
+  offset?: number;
+}
+
+// retrive option.
+// detail infomation, ref https://getpocket.com/developer/docs/v3/retrieve
+type retrievingParameters = retrievingRequiredParameters & retrievingOptionalParameters;
+
 class ApiClient {
   requestTokenPath: string = "oauth/request";
   accessTokenPath: string = "oauth/authorize";
-  getArticlesPath: string = "get";
+  retrieveArticlesPath: string = "get";
   addArticlesPath: string = "add";
-  sendArticlesPath: string = "send";
+  modifyArticlesPath: string = "send";
   _resArticles: any;
 
   _consumerKey: string;
   _accessToken?: string;
   _requestToken?: string;
 
-  constructor(
-    consumerKey: string,
-    accessToken?: string,
-    requestToken?: string,
-  ) {
+  _redirectUri: string;
+
+  constructor(consumerKey: string, options?: cilentConfigOptions) {
     this._consumerKey = consumerKey;
+    const { requestToken, accessToken, redirectUri } = options;
     this._requestToken = requestToken;
     this._accessToken = accessToken;
+    this._redirectUri = redirectUri || "http://localhost:8080/get";
   }
 
   getRequestToken() {
-    return new Promise(resolve => {
-      pocket.getRequestToken(this._consumerKey, function(
-        data: requestTokenResponse
-      ) {
-        console.log(data.code);
-        return resolve(data.code);
-      });
+    return request({
+      method: "POST",
+      data: {
+        consumer_key: this._consumerKey,
+        redirect_uri: "http://localhost:8080/get",
+      },
+      url: this.requestTokenPath,
+    }).then(response => {
+      this._requestToken = response.data.code;
+      console.log(
+        `open following url and accept application with running local server (go run main.go makes good for use). This must operate at least once.
+          https://getpocket.com/auth/authorize?request_token=${
+            this._requestToken
+          }&redirect_uri=${this._redirectUri}
+        `
+      );
     });
   }
 
   getAccessToken() {
     if (!this._requestToken) {
-      throw TypeError("this operation require request_token.")
+      throw TypeError("this operation require request_token.");
     }
-    return new Promise(resolve => {
-      pocket.getAccessToken(
-        this._consumerKey,
-        this._requestToken,
-        (data: requestTokenResponse) => {
-          const accessToken = data.code;
-          this._accessToken = accessToken;
-          return resolve(accessToken);
-        }
-      );
+
+    return request({
+      method: "POST",
+      data: {
+        consumer_key: this._consumerKey,
+        code: this._requestToken,
+        // TODO: this parameter may remobale thing.
+        // see: https://getpocket.com/developer/docs/authentication
+        redirect_uri: this._redirectUri,
+      },
+      url: this.accessTokenPath,
+    }).then(response => {
+      this._accessToken = response.data.access_token;
+      return this._accessToken;
     });
   }
 
-  getArticles() {
-    return new Promise((resolve, reject) => {
-      if (!this._accessToken) {
-        throw TypeError("this operation require access_token.")
+  // https://getpocket.com/developer/docs/v3/retrieve
+  retrieveArticles(options: retrievingOptionalParameters = {}) {
+    if (!this._accessToken) {
+      throw TypeError("this operation require access_token.");
+    }
+    const data: retrievingParameters = {
+      consumer_key: this._consumerKey,
+      access_token: this._accessToken,
+      ...options
+    };
+    return request({
+      method: "POST",
+      data,
+      url: this.retrieveArticlesPath,
+    }).then(response => {
+      const data: retrieveArticlesResponse = response.data;
+      if (!data) {
+        return Promise.reject();
       }
-      pocket.getArticles(
-        this._consumerKey,
-        this._accessToken,
-        (error, data?: getArticlesResponse) => {
-          if (error || !data) {
-            return reject(error);
-          }
-
-          const articleList = data.list;
-          this._resArticles = Object.keys(articleList).map(
-            key => articleList[key]
-          );
-          return resolve(this._resArticles);
-        }
-      );
+      const dataList = data.list;
+      // TODO: because dataList is not Array, so sort order is not guaranteed.
+      this._resArticles = Object.keys(dataList).map(key => dataList[key]);
+      return this._resArticles;
     });
+  }
+
+  // https://getpocket.com/developer/docs/v3/add
+  addArticles() {
+    throw Error("sorry, addArticles is not implemented method");
+    // TODO
+  }
+
+  // https://getpocket.com/developer/docs/v3/modify
+  modifyArticles() {
+    throw Error("sorry, addArticles is not implemented method");
+    // TODO
   }
 }
 
