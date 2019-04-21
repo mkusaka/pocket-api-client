@@ -1,7 +1,6 @@
 const pocket = require("pocket-api");
 
 import { request } from "./ajax";
-import { rejects } from "assert";
 interface requestTokenResponse {
   code: string;
   state: any;
@@ -168,11 +167,9 @@ class ApiClient {
       },
       url: this.accessTokenPath,
     }).then(response => {
-        console.log(response);
-        console.log(response.data.code);
-        this._accessToken = response.data.code;
-        return this._accessToken;
-      });
+      this._accessToken = response.data.code;
+      return this._accessToken;
+    });
   }
 
   getArticles() {
@@ -194,41 +191,6 @@ class ApiClient {
       }
       this._resArticles = data.list;
       return this._resArticles;
-    });
-    new Promise((resolve, reject) => {
-      pocket.getArticles(
-        this._consumerKey,
-        this._accessToken,
-        (error, data?: getArticlesResponse) => {
-          if (error || !data) {
-            return reject(error);
-          }
-
-          const articleList = data.list;
-          this._resArticles = Object.keys(articleList).map(
-            key => articleList[key]
-          );
-          return resolve(this._resArticles);
-        }
-      );
-    });
-
-    return new Promise((resolve, reject) => {
-      pocket.getArticles(
-        this._consumerKey,
-        this._accessToken,
-        (error, data?: getArticlesResponse) => {
-          if (error || !data) {
-            return reject(error);
-          }
-
-          const articleList = data.list;
-          this._resArticles = Object.keys(articleList).map(
-            key => articleList[key]
-          );
-          return resolve(this._resArticles);
-        }
-      );
     });
   }
 }
