@@ -9,3 +9,9 @@ prettier.config.js
 tsconfig.json
 tslint.json
 yarn-error.log
+
+.env
+
+*.log
+
+playground.ts
