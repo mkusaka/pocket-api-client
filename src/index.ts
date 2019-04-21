@@ -1,10 +1,4 @@
-const pocket = require("pocket-api");
-
 import { request } from "./ajax";
-interface requestTokenResponse {
-  code: string;
-  state: any;
-}
 
 interface responseArticle {
   item_id: string;
@@ -85,7 +79,7 @@ interface retrieveArticlesResponse {
   since: number
 }
 
-interface optionConfig {
+interface cilentConfigOptions {
   accessToken?: string,
   requestToken?: string,
   redirectUri?: string,
@@ -128,7 +122,7 @@ class ApiClient {
 
   _redirectUri: string;
 
-  constructor(consumerKey: string, options?: optionConfig) {
+  constructor(consumerKey: string, options?: cilentConfigOptions) {
     this._consumerKey = consumerKey;
     const { requestToken, accessToken, redirectUri } = options;
     this._requestToken = requestToken;
