@@ -165,7 +165,7 @@ class ApiClient {
       },
       url: this.accessTokenPath,
     }).then(response => {
-      this._accessToken = response.data.code;
+      this._accessToken = response.data.access_token;
       return this._accessToken;
     });
   }
@@ -181,7 +181,7 @@ class ApiClient {
     return request({
       method: "POST",
       data,
-      url: this.accessTokenPath,
+      url: this.getArticlesPath,
     }).then(response => {
       const data: getArticlesResponse = response.data;
       if (!data) {
