@@ -16,7 +16,7 @@ interface responseArticle {
   time_updated: string;
   time_read: string;
   time_favorited: string;
-  sort_id: 10,
+  sort_id: number,
   resolved_title: string;
   resolved_url: string;
   excerpt: string;
@@ -32,7 +32,7 @@ interface responseArticle {
     logo: string;
     greyscale_logo: string;
   },
-  listen_duration_estimate: 835
+  listen_duration_estimate: number
 }
 
 /*
