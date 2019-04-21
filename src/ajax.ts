@@ -9,11 +9,13 @@ export const axiosInstance: AxiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use(request => {
+  // TODO: log may need to be configuable. add verbose option and if it true, show request parameters.
   console.log("Starting Request: ", request);
   return request;
 });
 
 axiosInstance.interceptors.response.use(response => {
+  // TODO: log may need to be configuable. add verbose option and if it true, show response parameters.
   console.log("Response: ", response);
   return response;
 });
