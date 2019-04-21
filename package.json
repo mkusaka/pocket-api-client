@@ -41,6 +41,7 @@
     "typescript": "^3.3.3333"
   },
   "dependencies": {
+    "axios": "^0.18.0",
     "pocket-api": "^0.2.3"
   }
 }

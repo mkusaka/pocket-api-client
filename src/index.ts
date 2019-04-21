@@ -1,5 +1,6 @@
 const pocket = require("pocket-api");
 
+import { request } from "./ajax";
 interface requestTokenResponse {
   code: string;
   state: any;
@@ -84,6 +85,12 @@ interface getArticlesResponse {
   since: number
 }
 
+interface optionConfig {
+  accessToken?: string,
+  requestToken?: string,
+  redirectUri?: string,
+}
+
 class ApiClient {
   requestTokenPath: string = "oauth/request";
   accessTokenPath: string = "oauth/authorize";
@@ -96,30 +103,41 @@ class ApiClient {
   _accessToken?: string;
   _requestToken?: string;
 
-  constructor(
-    consumerKey: string,
-    accessToken?: string,
-    requestToken?: string,
-  ) {
+  _redirectUri: string;
+
+  constructor(consumerKey: string, options?: optionConfig) {
     this._consumerKey = consumerKey;
-    this._requestToken = requestToken;
-    this._accessToken = accessToken;
+    this._redirectUri = "http://localhost:8080/get";
+    if (options) {
+      this._requestToken = options.requestToken;
+      this._accessToken = options.accessToken;
+      this._redirectUri = options.redirectUri;
+    }
   }
 
   getRequestToken() {
-    return new Promise(resolve => {
-      pocket.getRequestToken(this._consumerKey, function(
-        data: requestTokenResponse
-      ) {
-        console.log(data.code);
-        return resolve(data.code);
-      });
+    return request({
+      method: "POST",
+      data: {
+        consumer_key: this._consumerKey,
+        redirect_uri: "http://localhost:8080/get",
+      },
+      url: this.requestTokenPath,
+    }).then(response => {
+      this._requestToken = response.data.code;
+      console.log(
+        `open following url and accept application with running local server (go run main.go makes good for use). This must operate at least once.
+          https://getpocket.com/auth/authorize?request_token=${
+            this._requestToken
+          }&redirect_uri=${this._redirectUri}
+        `
+      );
     });
   }
 
   getAccessToken() {
     if (!this._requestToken) {
-      throw TypeError("this operation require request_token.")
+      throw TypeError("this operation require request_token.");
     }
     return new Promise(resolve => {
       pocket.getAccessToken(
@@ -136,7 +154,7 @@ class ApiClient {
 
   getArticles() {
     if (!this._accessToken) {
-      throw TypeError("this operation require access_token.")
+      throw TypeError("this operation require access_token.");
     }
     return new Promise((resolve, reject) => {
       pocket.getArticles(
