@@ -190,7 +190,9 @@ class ApiClient {
       if (!data) {
         return Promise.reject();
       }
-      this._resArticles = data.list;
+      const dataList = data.list;
+      // TODO: because dataList is not Array, so sort order is not guaranteed.
+      this._resArticles = Object.keys(dataList).map(key => dataList[key]);
       return this._resArticles;
     });
   }
