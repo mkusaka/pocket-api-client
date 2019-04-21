@@ -135,7 +135,7 @@ class ApiClient {
       method: "POST",
       data: {
         consumer_key: this._consumerKey,
-        redirect_uri: "http://localhost:8080/get",
+        redirect_uri: this._redirectUri,
       },
       url: this.requestTokenPath,
     }).then(response => {

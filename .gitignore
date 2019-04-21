@@ -99,3 +99,5 @@ authorize.rb
 ruby.rb
 
 playground.ts
+
+tmp/
