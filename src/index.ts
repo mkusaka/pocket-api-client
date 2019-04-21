@@ -91,11 +91,12 @@ interface optionConfig {
   redirectUri?: string,
 }
 
-// retrive option.
-// detail infomation, ref https://getpocket.com/developer/docs/v3/retrieve
-interface retrievingParameters {
+interface retrievingRequiredParameters {
   consumer_key: string;
   access_token: string;
+}
+
+interface retrievingOptionalParameters {
   state?: "unread" | "archive" | "all";
   favorite?: 0 | 1;
   tag?: string;
@@ -108,6 +109,10 @@ interface retrievingParameters {
   count?: number;
   offset?: number;
 }
+
+// retrive option.
+// detail infomation, ref https://getpocket.com/developer/docs/v3/retrieve
+type retrievingParameters = retrievingRequiredParameters & retrievingOptionalParameters;
 
 class ApiClient {
   requestTokenPath: string = "oauth/request";
@@ -173,13 +178,14 @@ class ApiClient {
   }
 
   // https://getpocket.com/developer/docs/v3/retrieve
-  retrieveArticles() {
+  retrieveArticles(options: retrievingOptionalParameters = {}) {
     if (!this._accessToken) {
       throw TypeError("this operation require access_token.");
     }
     const data: retrievingParameters = {
       consumer_key: this._consumerKey,
       access_token: this._accessToken,
+      ...options
     };
     return request({
       method: "POST",
