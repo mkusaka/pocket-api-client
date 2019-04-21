@@ -135,10 +135,10 @@ class ApiClient {
   }
 
   getArticles() {
+    if (!this._accessToken) {
+      throw TypeError("this operation require access_token.")
+    }
     return new Promise((resolve, reject) => {
-      if (!this._accessToken) {
-        throw TypeError("this operation require access_token.")
-      }
       pocket.getArticles(
         this._consumerKey,
         this._accessToken,
