@@ -1,6 +1,6 @@
 {
   "name": "@mkusaka/pocket-api-client",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "pocket api client",
   "main": "dist/index.js",
   "engines": {
@@ -21,7 +21,7 @@
     "url": "git+https://github.com/mkusaka/pocket-api-client.git"
   },
   "keywords": [
-    "test package"
+    "pocket pocket-api pocket-api-client"
   ],
   "author": "mkusaka <hinoshita1992@gmail.com>",
   "license": "MIT",
