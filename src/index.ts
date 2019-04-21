@@ -72,7 +72,7 @@ interface responseArticle {
 }
 */
 
-interface getArticlesResponse {
+interface retrieveArticlesResponse {
   state: number;
   complete: number;
   list: {
@@ -91,6 +91,8 @@ interface optionConfig {
   redirectUri?: string,
 }
 
+// retrive option.
+// detail infomation, ref https://getpocket.com/developer/docs/v3/retrieve
 interface retrievingParameters {
   consumer_key: string;
   access_token: string;
@@ -110,9 +112,9 @@ interface retrievingParameters {
 class ApiClient {
   requestTokenPath: string = "oauth/request";
   accessTokenPath: string = "oauth/authorize";
-  getArticlesPath: string = "get";
+  retrieveArticlesPath: string = "get";
   addArticlesPath: string = "add";
-  sendArticlesPath: string = "send";
+  modifyArticlesPath: string = "send";
   _resArticles: any;
 
   _consumerKey: string;
@@ -170,26 +172,39 @@ class ApiClient {
     });
   }
 
-  getArticles() {
+  // https://getpocket.com/developer/docs/v3/retrieve
+  retrieveArticles() {
     if (!this._accessToken) {
       throw TypeError("this operation require access_token.");
     }
     const data: retrievingParameters = {
       consumer_key: this._consumerKey,
       access_token: this._accessToken,
-    }
+    };
     return request({
       method: "POST",
       data,
-      url: this.getArticlesPath,
+      url: this.retrieveArticlesPath,
     }).then(response => {
-      const data: getArticlesResponse = response.data;
+      const data: retrieveArticlesResponse = response.data;
       if (!data) {
         return Promise.reject();
       }
       this._resArticles = data.list;
       return this._resArticles;
     });
+  }
+
+  // https://getpocket.com/developer/docs/v3/add
+  addArticles() {
+    throw Error("sorry, addArticles is not implemented method");
+    // TODO
+  }
+
+  // https://getpocket.com/developer/docs/v3/modify
+  modifyArticles() {
+    throw Error("sorry, addArticles is not implemented method");
+    // TODO
   }
 }
 
