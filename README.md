@@ -66,6 +66,47 @@ client.retrieveArticles({
 
 ```
 
+# example use
+
+```ts
+import ApiClient, { responseArticle } from "@mkusaka/pocket-api-client";
+var fs = require("fs");
+
+
+async function fn() {
+  const client = new ApiClient("consumer_key", {
+    accessToken: "access_token",
+  });
+  return await client.retrieveArticles({
+    since: 1555081200,
+    state: "all"
+  }).then(articles => {
+    const mdarticles = articles.map((e: responseArticle) => {
+      return `- [${e.resolved_title && e.resolved_title.length > 0 ? e.resolved_title : e.resolved_title}](${e.resolved_url && e.resolved_url.length > 0 ? e.resolved_url : e.given_url})`
+    }).join("\n")
+
+    return mdarticles
+  })
+  .then(mdarticles => {
+    return fs.writeFile("out.md", mdarticles, err => {
+      if (err) console.log(err);
+      else console.log("write file end");
+    });
+  });
+}
+
+fn();
+```
+
+(my) output
+
+```md
+- [Linux From Scratch](http://www.linuxfromscratch.org/lfs/view/stable/)
+- [Fixing the Gemfile not found (Bundler::GemfileNotFound) error](https://blog.willj.net/2011/08/02/fixing-the-gemfile-not-found-bundlergemfilenotfound-error/)
+...
+```
+
+
 # TODO
 - seamless process like follow will be implemented (maybe).
 
