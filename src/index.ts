@@ -1,6 +1,7 @@
 import { request } from "./ajax";
 
-interface responseArticle {
+// TODO: some of properities are optional, so specify and make it use optional type.
+export interface responseArticle {
   item_id: string;
   resolved_id: string;
   given_url: string;
