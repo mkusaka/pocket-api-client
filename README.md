@@ -119,5 +119,9 @@ const client = new ApiClient("your consumer_key", {
   .then(articles => );
 ```
 
+- add `add item into pocket` and `modify item in pocket` method
+- add verbose option
+- add test
+
 # ref
 - [Pocket Developer Program: Pocket API Documentation](https://getpocket.com/developer/docs/overview)
