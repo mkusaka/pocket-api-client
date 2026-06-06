@@ -4,17 +4,16 @@
   "description": "pocket api client",
   "main": "dist/index.js",
   "engines": {
-    "yarn": ">=1.13.0",
     "node": ">=10.8.0"
   },
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
     "test": "mocha -r ts-node/register \"test/**/*.ts\" --reporter spec",
-    "ci": "yarn run build",
+    "ci": "pnpm run build",
     "postversion": "git push && git push --tags",
-    "prepublishOnly": "yarn run ci",
-    "preversion": "yarn run ci"
+    "prepublishOnly": "pnpm run ci",
+    "preversion": "pnpm run ci"
   },
   "repository": {
     "type": "git",
@@ -45,5 +44,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "packageManager": "pnpm@11.5.2"
 }
